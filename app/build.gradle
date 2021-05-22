@@ -6,7 +6,7 @@ plugins {
 android {
     compileSdkVersion 30
     buildToolsVersion "30.0.3"
-
+    defaultPublishConfig "debug"
     defaultConfig {
         applicationId "com.example.modulestubtest"
         minSdkVersion 26
@@ -18,6 +18,9 @@ android {
     }
 
     buildTypes {
+        debug {
+            testCoverageEnabled = true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -31,8 +34,9 @@ android {
         jvmTarget = '1.8'
     }
 
+    // println "project.properties['useDebugApkWithLibrary'] = ${project.properties['useDebugApkWithLibrary'].toBoolean() == true}"
     // 禁止生成apk，以免覆盖带有依赖的apk
-    if (project.hasProperty('useDebugApkWithLibrary') && project.properties['useDebugApkWithLibrary'] == true) {
+    if (project.hasProperty('useDebugApkWithLibrary') && project.properties['useDebugApkWithLibrary'].toBoolean() == true) {
         println "本次编译使用带有依赖库的apk"
         copy {
             from "$project.rootDir/resources/app-debug-with-dependencies.apk"
@@ -42,6 +46,12 @@ android {
                 filename.replace("app-debug-with-dependencies.apk", "app-debug.apk")
             }
         }
+
+        copy {
+            from "$project.rootDir/resources/output-metadata.json"
+            into "../$project.name/build/outputs/apk/debug"
+        }
+
 
         android.applicationVariants.all { variant ->
             variant.outputs.each { output ->
