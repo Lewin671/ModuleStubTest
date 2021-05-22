@@ -2,7 +2,8 @@ package com.example.modulestubtest
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.example.lib.coroutineRequest
+import com.example.lib.CoroutineImpl
+import com.example.lib.TestLib
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,6 +24,11 @@ class ExampleInstrumentedTest {
 
     @Test
     fun coroutineTest() {
-        coroutineRequest()
+        CoroutineImpl().coroutineRequest()
+    }
+
+    @Test
+    fun addTest(){
+        assertEquals(TestLib().add(1,2),3)
     }
 }
