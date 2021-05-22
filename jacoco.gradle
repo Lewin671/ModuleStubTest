@@ -1,0 +1,66 @@
+apply plugin: 'jacoco'
+
+jacoco {
+    toolVersion = '0.8.1'
+}
+
+task jacocoUnitTestReport(type: JacocoReport) {
+    reports {
+        xml.enabled = true
+        html.enabled = true
+    }
+    
+    group = 'report'
+    description = 'jacoco reporting'
+
+    def modules = ['app', 'lib']
+
+    def coverageSourceDirs = modules.collect {
+        "$it/src/main/java"
+    }
+
+    def coverageClassDirs = modules.collect {
+        ["$it/build/intermediates/javac", "$it/build/tmp/kotlin-classes/debug"]
+    }.flatten()
+
+    def fileFilter = [
+            '**/R.class',
+            '**/R$*.class',
+            '**/*$ViewInjector*.*',
+            '**/*$ViewBinder*.*',
+            '**/BuildConfig.*',
+            '**/Manifest*.*',
+            '**/lib_debug.kotlin_module'
+    ]
+
+    def ecFiles = modules.collect {
+        fileTree(
+                dir: "$it/build/outputs/code_coverage/debugAndroidTest/connected/",
+                includes: ['*.ec']
+        )
+    }
+
+    println "ecFiles are ${ecFiles}"
+    println "class files are ${coverageClassDirs}"
+
+    // classDirectories.setFrom(javaClasses.files.flatten())
+    // additionalSourceDirs.from(files(coverageSourceDirs))
+    sourceDirectories.from(files(coverageSourceDirs))
+    executionData.setFrom(ecFiles.files.flatten())
+    classDirectories.from(files(coverageClassDirs).files.collect {
+        fileTree(
+                dir: it,
+                excludes: fileFilter
+        )
+    })
+
+    doFirst {
+        coverageClassDirs.each { path ->
+            new File(path).eachFileRecurse { file ->
+                if (file.name.contains('$$')) {
+                    file.renameTo(file.path.replace('$$', '$'))
+                }
+            }
+        }
+    }
+}
